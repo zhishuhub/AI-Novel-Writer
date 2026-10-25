@@ -141,20 +141,14 @@ describe('Windows update release artifact verification', () => {
     expect(() => verifyWindowsUpdateArtifacts(root)).toThrow('must not contain portable ZIP archives')
   })
 
-  it('resolves electron-builder to a Windows-only NSIS final-release update configuration', async () => {
+  // 一键接入版不发布更新源（应用从网站检查新版本），Windows 安装包不带 GitHub 更新配置
+  it('resolves electron-builder to a Windows-only NSIS installer without an update feed', async () => {
     const config = await loadElectronBuilderConfig(path.resolve('.'))
     const windowsTargets = Array.isArray(config.win?.target) ? config.win.target : [config.win?.target]
     const windowsPublish = Array.isArray(config.win?.publish) ? config.win.publish[0] : config.win?.publish
 
     expect(windowsTargets).toEqual([{ target: 'nsis', arch: ['x64'] }])
     expect(config.nsis?.artifactName).toBe('ai-novel-writer-setup-${version}.${ext}')
-    expect(windowsPublish).toMatchObject({
-      provider: 'github',
-      owner: 'EthanYoQ',
-      repo: 'AI-Novel-Writer',
-      releaseType: 'release',
-      publishAutoUpdate: true,
-      tagNamePrefix: 'v',
-    })
+    expect(windowsPublish).toBeUndefined()
   })
 })

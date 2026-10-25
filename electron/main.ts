@@ -39,6 +39,7 @@ import { runGlobalDataMigration, activateGlobalData } from './services/global-da
 import { ensureVelaHome } from './utils/config-utils'
 import type { StartupBlockedCode, StartupMigrationNotice } from '../src/shared/startup-contract'
 import { APP_BRAND } from '../src/shared/brand'
+import { ZHISHU_MANAGED_AI } from '../src/shared/zhishu'
 
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import path from 'node:path'
@@ -265,7 +266,8 @@ app.whenReady().then(async () => {
   createWindow()
   const windowsUpdateEnabled = isWindowsUpdateRuntimeEnabled(app.isPackaged, VITE_DEV_SERVER_URL)
   const macUpdateReminderEnabled = isMacUpdateReminderEnabled(app.isPackaged, VITE_DEV_SERVER_URL)
-  const updateRuntimeEnabled = windowsUpdateEnabled || macUpdateReminderEnabled
+  // 一键接入版不检查原项目的 GitHub 更新，改由界面查询网站上的最新版本
+  const updateRuntimeEnabled = !ZHISHU_MANAGED_AI && (windowsUpdateEnabled || macUpdateReminderEnabled)
   const updateConfiguration = windowsUpdateEnabled && !hasWindowsUpdateConfiguration()
     ? 'missing'
     : 'available'

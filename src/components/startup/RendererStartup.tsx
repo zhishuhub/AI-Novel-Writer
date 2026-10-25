@@ -4,6 +4,8 @@ import { ipc } from '../../services/ipc-client'
 import { systemColorTheme, useAppearanceStore, type AppearanceBootstrapDependencies } from '../../stores/appearance-bootstrap'
 import type { StartupMigrationNotice, StartupBlockedCode } from '../../shared/startup-contract'
 import { Button } from '../ui/Button'
+import { ZHISHU_MANAGED_AI } from '../../shared/zhishu'
+import { ZhishuGate } from '../zhishu/ZhishuGate'
 
 const desktopStartup: AppearanceBootstrapDependencies = {
   waitForMainReady: () => ipc.invoke('startup:get-state'),
@@ -66,7 +68,7 @@ export default function RendererStartup({
   }, [attempt, startupDependencies, loadWorkspace])
   // A later preference write failure must not unmount editors or discard in-memory author work.
   if (Workspace) return <>
-    <Workspace />
+    {ZHISHU_MANAGED_AI && ipc.isElectron ? <ZhishuGate theme={theme}><Workspace /></ZhishuGate> : <Workspace />}
     {phase === 'blocked' && <div role="alert" className="fixed inset-x-0 top-10 z-50 bg-[var(--color-panel)] px-4 py-2 text-center text-[var(--color-warning-text)]">{notice}</div>}
     {phase !== 'blocked' && !noticeDismissed && migrationNotice && (migrationNotice.legacySourceIgnored || migrationNotice.preservedUnknownCount > 0) &&
       <div className="paper-ink pi-overlay-host" data-theme={theme}><div role="status" className="startup-migration-notice fixed inset-x-0 top-10 z-50 [-webkit-app-region:no-drag] flex items-center justify-center gap-4 border-b border-[var(--rule-strong)] bg-[var(--surface)] px-4 py-2 text-[var(--ink)]">

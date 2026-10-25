@@ -92,6 +92,19 @@ export interface ConfigChannels {
   }
 }
 
+// ===== 一键接入 =====
+import type { ZhishuStatus } from './zhishu'
+
+export interface ZhishuChannels {
+  'zhishu:status': { args: [verify: boolean]; return: ZhishuStatus }
+  'zhishu:connect': { args: [code: string]; return: ZhishuStatus }
+  'zhishu:disconnect': { args: []; return: ZhishuStatus }
+  'zhishu:latest-version': { args: []; return: string }
+  'zhishu:read-clipboard': { args: []; return: string }
+  'zhishu:clear-clipboard': { args: [expected: string]; return: void }
+  'zhishu:open-url': { args: [url: string]; return: { success: boolean } }
+}
+
 // ===== 应用更新 =====
 export interface UpdateChannels {
   'update:get-state': {
@@ -1308,7 +1321,7 @@ export interface MCPChannels {
 }
 
 // ===== 合并所有频道 =====
-export type AllInvokeChannels = LegacyRosterGenerationChannels & CharacterAvatarChannels & CloudBackupChannels & GraphGenerationChannels & FinalizationGenerationChannels & EditorInlineGenerationChannels & ImportGenerationChannels & AgentGenerationChannels & ReviewRevisionGenerationInvokeChannels & FinalizedCharacterGenerationChannels & CharacterProposalChannels & GenerationOwnerChannels & StartupChannels & WindowChannels & OfficialHomepageChannels & ModelProviderResourceChannels & ConfigChannels & UpdateChannels & ProjectChannels & FileChannels & AppDataChannels & LLMChannels & DatabaseChannels & KnowledgeBaseChannels & ChapterLifecycleChannels & ImportChannels & MCPChannels
+export type AllInvokeChannels = LegacyRosterGenerationChannels & CharacterAvatarChannels & CloudBackupChannels & GraphGenerationChannels & FinalizationGenerationChannels & EditorInlineGenerationChannels & ImportGenerationChannels & AgentGenerationChannels & ReviewRevisionGenerationInvokeChannels & FinalizedCharacterGenerationChannels & CharacterProposalChannels & GenerationOwnerChannels & StartupChannels & WindowChannels & OfficialHomepageChannels & ModelProviderResourceChannels & ConfigChannels & ZhishuChannels & UpdateChannels & ProjectChannels & FileChannels & AppDataChannels & LLMChannels & DatabaseChannels & KnowledgeBaseChannels & ChapterLifecycleChannels & ImportChannels & MCPChannels
 export type AllEventChannels = GenerationOwnerEvents & LLMStreamEvents & UpdateStateEvents & WindowEvents
 
 /** 提取 invoke 频道名 */

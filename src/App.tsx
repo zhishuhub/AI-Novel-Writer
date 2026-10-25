@@ -15,6 +15,8 @@ import StageRoot from './components/stage/StageRoot'
 import StageShell from './components/stage/StageShell'
 import { actionToast } from './components/ui/ActionToast'
 import { UpdateNotifier } from './components/updates/UpdateNotifier'
+import { SiteUpdateNotice } from './components/zhishu/ZhishuSettings'
+import { ZHISHU_MANAGED_AI } from './shared/zhishu'
 import { globalEventBus } from './shared/event-bus'
 import {
   projectSessionContextFromProject,
@@ -177,7 +179,7 @@ export default function App() {
       <StageRoot theme={resolvedTheme} exitGuard={exitGuard}>
         <StageShell theme={resolvedTheme} />
       </StageRoot>
-      <UpdateNotifier />
+      {ZHISHU_MANAGED_AI ? <SiteUpdateNotice theme={resolvedTheme} /> : <UpdateNotifier />}
       {globalDialogs}
     </>
   )

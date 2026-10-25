@@ -1,6 +1,8 @@
 import { APP_BRAND } from '../../../shared/brand'
 import { useLocaleStore } from '../../../stores/locale-store'
 import { UpdateSettings } from '../StageUpdate'
+import { ZHISHU_MANAGED_AI } from '../../../shared/zhishu'
+import { ZhishuAbout } from '../../zhishu/ZhishuSettings'
 
 /** 关于与更新：应用名、版本、定位说明，以及检查更新与更新状态。 */
 export default function AboutSection() {
@@ -16,10 +18,10 @@ export default function AboutSection() {
         </div>
       </div>
       <p className="stage-set-about-text">{text(
-        '面向长篇小说的本地写作工具。作品、设定与草稿都存在你的电脑上；从设定、架构、蓝图到正文，每一步都可以交给你选择的模型协助。',
-        'A local writing tool for long-form fiction. Your books, settings and drafts stay on your computer, and every step from setup to manuscript can be assisted by the models you choose.',
+        '面向长篇小说的本地写作工具。作品、设定与草稿都存在你的电脑上；从设定、架构、蓝图到正文，每一步都可以交给 AI 协助。',
+        'A local writing tool for long-form fiction. Your books, settings and drafts stay on your computer, and every step from setup to manuscript can be assisted by AI.',
       )}</p>
-      <UpdateSettings />
+      {ZHISHU_MANAGED_AI ? <ZhishuAbout /> : <UpdateSettings />}
     </div>
   )
 }

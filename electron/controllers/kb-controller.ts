@@ -2,6 +2,7 @@ import { app, ipcMain, dialog } from 'electron'
 import type { IpcMainInvokeEvent } from 'electron'
 import path from 'node:path'
 import { readJsonFile, GLOBAL_CONFIG_PATH, DEFAULT_GLOBAL_CONFIG, MODELS_CONFIG_PATH } from '../utils/config-utils'
+import { ZHISHU_MANAGED_AI } from '../../src/shared/zhishu'
 import { GlobalConfig, ModelProfile } from '../../src/shared/ipc-channels'
 import { isProjectSessionContext } from '../../src/shared/project-session-context'
 import { hasRequiredApiKey } from '../../src/shared/provider-presets'
@@ -171,6 +172,8 @@ function isLegacyMigrationBlockedResult(value: unknown): boolean {
 const UNCONFIGURED_EMBEDDING_MODEL: EmbeddingModel = { provider: '', baseUrl: '', apiKey: '' }
 
 export function getEmbeddingConfig(): { protocol: 'openai' | 'gemini'; model: EmbeddingModel & { modelName: string } } | null {
+  // 一键接入没有向量模型：不拿对话模型去请求 /embeddings，知识库只按字词检索
+  if (ZHISHU_MANAGED_AI) return null
   const config = readJsonFile<GlobalConfig>(GLOBAL_CONFIG_PATH, DEFAULT_GLOBAL_CONFIG)
   const targetModelId = config.defaultEmbeddingModelId || config.defaultModelId
   if (!targetModelId) return null

@@ -1,0 +1,102 @@
+name: Zhishu desktop release
+
+# 一键接入版的打包：推 v{上游版本}-zs.{序号} 的 tag 触发，打 Windows、macOS（Apple 芯片、Intel）安装包，
+# 直接发正式 Release。不走上游的资格认证与升级冒烟（它们依赖原项目的更新源和未接入的界面）。
+on:
+  push:
+    tags:
+      - 'v*-zs.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zhishu-release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-x64
+            runner: windows-2022
+          - name: macos-arm64
+            runner: macos-15
+          - name: macos-x64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Check tag matches app version
+        shell: bash
+        run: test "${GITHUB_REF_NAME}" = "v$(node -p "require('./package.json').version")"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        with:
+          version: 11.11.0
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.23.1
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Windows installer
+        if: matrix.name == 'windows-x64'
+        env:
+          AI_NOVEL_RELEASE_GATE: release-win-verify
+        run: |
+          pnpm run clean:build
+          pnpm run build:win:artifacts
+
+      - name: Build macOS Apple silicon installer
+        if: matrix.name == 'macos-arm64'
+        run: pnpm run build:mac:arm64:artifacts
+
+      - name: Build macOS Intel installer
+        if: matrix.name == 'macos-x64'
+        run: pnpm run build:mac:x64:artifacts
+
+      - name: Upload installer
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            release/*/ai-novel-writer-setup-*.exe
+            release/*/ai-novel-writer-mac-*-installer.dmg
+          if-no-files-found: error
+
+  publish:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download installers
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          path: dist-release
+          merge-multiple: true
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find dist-release -type f \( -name '*.exe' -o -name '*.dmg' \) | sort)
+          test "${#files[@]}" -eq 3
+          ( cd dist-release && find . -type f \( -name '*.exe' -o -name '*.dmg' \) -exec sha256sum {} + )
+          gh release create "$GITHUB_REF_NAME" "${files[@]}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --notes "书童 Pagekin 一键接入版：AI 服务改为网站接入码一键接入，改动见 MODIFICATIONS.md。基于 https://github.com/EthanYoQ/AI-Novel-Writer 修改，遵循 GPL-3.0。"

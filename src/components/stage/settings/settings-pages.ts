@@ -1,4 +1,5 @@
 import type { SettingsSection } from '../../../stores/layout-store'
+import { ZHISHU_MANAGED_AI } from '../../../shared/zhishu'
 
 type Pair = readonly [string, string]
 
@@ -19,8 +20,13 @@ export interface SettingsPageSpec {
 /** ia.md 的三组：常用、高级、其他。 */
 export const SETTINGS_GROUPS: readonly { id: string; name: Pair; pages: readonly SettingsPageSpec[] }[] = [
   { id: 'common', name: ['常用', 'Common'], pages: [
+    // 一键接入：模型由网站接入提供，「AI 模型」页只显示接入状态；线上没有向量模型，不显示「检索模型」页
+    ...(ZHISHU_MANAGED_AI ? [
+      { id: 'llm', name: ['AI 服务', 'AI service'], lede: ['写作、审稿、修稿都用网站接入的 AI。', 'Writing, reviews and revisions use the AI connected from the website.'] },
+    ] satisfies SettingsPageSpec[] : [
     { id: 'llm', required: { missing: models => !models.defaultModelId }, name: ['AI 模型', 'AI models'], lede: ['写作、审稿、修稿都用这里的模型。标为默认的会预先选好，每次运行前仍可临时换。', 'Writing, reviews and revisions use these models. The default is preselected and can be changed before each run.'] },
     { id: 'embedding', required: { missing: models => !models.defaultEmbeddingModelId }, name: ['检索模型', 'Retrieval model'], lede: ['知识库用它理解资料的意思，按意思找到相关段落；伏笔、人物与前文都靠它找回。', 'The knowledge base uses it to understand your material and find passages by meaning, which is how foreshadowing, characters and earlier chapters are recalled.'] },
+    ] satisfies SettingsPageSpec[]),
     { id: 'appearance', name: ['外观', 'Appearance'], lede: ['改动立即生效，不需要保存。', 'Changes apply right away. No need to save.'] },
   ] },
   { id: 'advanced', name: ['高级', 'Advanced'], pages: [

@@ -39,6 +39,7 @@ vi.mock('../controllers/character-avatar-controller', () => ({
   }),
 }))
 vi.mock('../controllers/config-controller', () => ({ registerConfigController: vi.fn() }))
+vi.mock('../controllers/zhishu-controller', () => ({ registerZhishuController: vi.fn() }))
 vi.mock('../controllers/project-controller', () => ({ registerProjectController: vi.fn() }))
 vi.mock('../controllers/project-archive-controller', () => ({ registerProjectArchiveController: vi.fn() }))
 vi.mock('../controllers/cloud-backup-controller', () => ({ registerCloudBackupController: vi.fn() }))

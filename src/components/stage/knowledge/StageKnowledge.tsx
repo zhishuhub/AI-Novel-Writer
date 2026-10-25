@@ -18,6 +18,7 @@ import { commandLabel } from '../shortcut-keys'
 import { highlight } from './search-highlight'
 import { EMPTY_DRAFT, isImportedDocument, useKnowledgeBase } from './use-knowledge-base'
 import { pluralEn } from '../../../shared/plural-en'
+import { ZHISHU_MANAGED_AI } from '../../../shared/zhishu'
 
 type Shelf = 'imported' | 'chapters'
 
@@ -250,10 +251,12 @@ export default function StageKnowledge({ tabId }: { tabId: string }) {
           <p className="stage-kb-help">
             {hasMeaningSearch
               ? text('可以按意思和字词查找。', 'Search by meaning and by words.')
-              : <>{text('可以按字词查找。配置检索模型后，还能按意思查找。', 'Search by words. Set up a retrieval model to also search by meaning.')}{' '}
+              : ZHISHU_MANAGED_AI
+                ? text('可以按字词查找。', 'Search by words.')
+                : <>{text('可以按字词查找。配置检索模型后，还能按意思查找。', 'Search by words. Set up a retrieval model to also search by meaning.')}{' '}
                 <Button variant="text" size="sm" onClick={openSettings}>{text('去设置', 'Open settings')}</Button></>}
           </p>
-          {vectorless > 0 && (
+          {!ZHISHU_MANAGED_AI && vectorless > 0 && (
             <Notice
               tone="warn"
               title={text(`有 ${vectorless} 段资料还不能按意思查找`, `${vectorless} ${pluralEn(vectorless, 'passage')} cannot be searched by meaning yet`)}

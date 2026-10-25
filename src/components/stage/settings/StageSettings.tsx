@@ -17,6 +17,8 @@ import AppearanceSection from './AppearanceSection'
 import ModelsSection from './ModelsSection'
 import ProxySection from './ProxySection'
 import { SETTINGS_GROUPS, SETTINGS_PAGES, type SettingsPageSpec } from './settings-pages'
+import { ZHISHU_MANAGED_AI } from '../../../shared/zhishu'
+import { ZhishuAccountSection } from '../../zhishu/ZhishuSettings'
 
 interface RequiredState {
   missing: boolean
@@ -77,6 +79,10 @@ function Legacy({ children }: { children: ReactNode }) {
 }
 
 function PageBody({ page }: { page: SettingsSection }) {
+  // 一键接入：模型和检索模型页都换成接入状态
+  if (ZHISHU_MANAGED_AI && (page === 'llm' || page === 'embedding')) {
+    return <><PageHeader page="llm" /><ZhishuAccountSection /></>
+  }
   switch (page) {
     case 'llm':
       return <ModelsSection purposes={['generation', 'refinement', 'summary']} header={action => <PageHeader page="llm" action={action} />} />

@@ -23,6 +23,8 @@ import {
   ModelExecutionLeaseRegistry,
 } from '../services/model-execution-lease'
 import { ModelDiscoveryService } from '../services/model-discovery-service'
+import { ZHISHU_MANAGED_AI } from '../../src/shared/zhishu'
+import { zhishuDefaultModelId, zhishuModelProfiles } from '../zhishu/zhishu-connection'
 
 interface ActiveStream {
   controller: AbortController
@@ -41,7 +43,14 @@ function connectionTestTimeoutMs(model: ModelProfile): number {
 
 const CLOSED_EXECUTION_LEASE_TOMBSTONE_TTL_MS = 5 * 60_000
 
+/** 一键接入时模型只来自接入信息，不读也不改 models.json。 */
+const managedModelRefusal = () => ({
+  success: false,
+  error: mainText(app.getLocale(), 'AI 服务由网站接入提供，不能在这里修改', 'The AI service is provided by the website connection and cannot be changed here.'),
+})
+
 function loadModelConfigs(): ModelProfile[] {
+  if (ZHISHU_MANAGED_AI) return zhishuModelProfiles()
   return readJsonFile<ModelProfile[]>(MODELS_CONFIG_PATH, [])
 }
 
@@ -317,6 +326,7 @@ export function registerLLMController() {
   ipcMain.handle('llm:list-models', async () => loadModelConfigs())
 
   ipcMain.handle('llm:discover-models', async (_event, request: ModelDiscoveryRequest) => {
+    if (ZHISHU_MANAGED_AI) return { success: false, errorCode: 'invalid_response' as const }
     try {
       applyProxyConfig()
       return await modelDiscovery.discoverModels(request)
@@ -326,6 +336,7 @@ export function registerLLMController() {
   })
 
   ipcMain.handle('llm:save-model', async (_event, model: ModelProfile) => {
+    if (ZHISHU_MANAGED_AI) return managedModelRefusal()
     try {
       if (model.reasoningMapping !== undefined && (!isReasoningMapping(model.reasoningMapping)
         || !reasoningAdapterFitsProtocol(model.protocol, model.reasoningMapping.adapter))) {
@@ -343,6 +354,7 @@ export function registerLLMController() {
   })
 
   ipcMain.handle('llm:delete-model', async (_event, modelId: string) => {
+    if (ZHISHU_MANAGED_AI) return managedModelRefusal()
     let originalConfig: GlobalConfig | undefined
     let configChanged = false
     try {
@@ -392,6 +404,7 @@ export function registerLLMController() {
   })
 
   ipcMain.handle('llm:set-default-model', async (_event, modelId: string | null) => {
+    if (ZHISHU_MANAGED_AI) return managedModelRefusal()
     try {
       const config = loadGlobalConfigForUpdate()
       config.defaultModelId = modelId
@@ -403,11 +416,13 @@ export function registerLLMController() {
   })
 
   ipcMain.handle('llm:get-default-model', async () => {
+    if (ZHISHU_MANAGED_AI) return zhishuDefaultModelId()
     const config = readJsonFile<GlobalConfig>(GLOBAL_CONFIG_PATH, DEFAULT_GLOBAL_CONFIG)
     return config.defaultModelId
   })
 
   ipcMain.handle('llm:set-default-embedding-model', async (_event, modelId: string | null) => {
+    if (ZHISHU_MANAGED_AI) return managedModelRefusal()
     try {
       const config = loadGlobalConfigForUpdate()
       config.defaultEmbeddingModelId = modelId
@@ -419,6 +434,8 @@ export function registerLLMController() {
   })
 
   ipcMain.handle('llm:get-default-embedding-model', async () => {
+    // 线上没有向量模型，知识库只按字词检索
+    if (ZHISHU_MANAGED_AI) return null
     const config = readJsonFile<GlobalConfig>(GLOBAL_CONFIG_PATH, DEFAULT_GLOBAL_CONFIG)
     return config.defaultEmbeddingModelId ?? null
   })
@@ -428,6 +445,12 @@ export function registerLLMController() {
     model: ModelProfile,
     creativeStrategy: LLMRequest['creativeStrategy'] = 'auto',
   ) => {
+    // 一键接入时只测接入的那条配置，忽略界面传来的地址和密钥
+    if (ZHISHU_MANAGED_AI) {
+      const managed = zhishuModelProfiles()[0]
+      if (!managed) return managedModelRefusal()
+      model = managed
+    }
     // 网络卡住时 undici 默认要等 300 秒才报 fetch failed；连接测试自己的截止时间会真正取消请求。
     const timeoutMs = connectionTestTimeoutMs(model)
     const deadline = new AbortController()

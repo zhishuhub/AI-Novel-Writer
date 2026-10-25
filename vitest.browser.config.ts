@@ -31,7 +31,7 @@ export default defineConfig({
   },
   test: {
     include: ['src/**/*.browser.tsx'],
-    setupFiles: ['test/setup-locale.ts', 'test/setup-paper-ink.ts', 'test/setup-stage-styles.ts'],
+    setupFiles: ['test/setup-locale.ts', 'test/setup-zhishu.ts', 'test/setup-paper-ink.ts', 'test/setup-stage-styles.ts'],
     browser: {
       enabled: true,
       // Windows/HNS can reserve any fixed high port, including on hosted CI.

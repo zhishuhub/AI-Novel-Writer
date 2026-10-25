@@ -42,17 +42,7 @@
         "arch": ["x64"]
       }
     ],
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "EthanYoQ",
-        "repo": "AI-Novel-Writer",
-        "channel": "latest",
-        "releaseType": "release",
-        "publishAutoUpdate": true,
-        "tagNamePrefix": "v"
-      }
-    ],
+    // 一键接入版不发布更新源，应用改为从网站检查新版本
     "extraResources": [
       {
         "from": "electron/security/windows-safe-file-system.ps1",

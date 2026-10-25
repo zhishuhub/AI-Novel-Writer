@@ -1,0 +1,125 @@
+/* 一键接入：接入页（首次全屏；在网站停止授权后盖在工作台上面）、设置页的接入状态与网站更新提示。只用纸墨令牌。 */
+.zs-gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-8);
+  background: var(--frame);
+  color: var(--ink);
+  font: 400 var(--fs-13)/1.6 var(--font-ui);
+}
+
+.zs-gate--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-prompt);
+  background: color-mix(in srgb, var(--frame) 92%, transparent);
+}
+
+.zs-gate-card {
+  width: 460px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--s-3);
+  padding: var(--s-8) var(--s-8) var(--s-6);
+  border-radius: var(--radius-panel);
+  background: var(--layer);
+  box-shadow: var(--shadow-dialog);
+}
+
+.zs-gate-mark {
+  align-self: center;
+  margin-bottom: var(--s-1);
+}
+
+.zs-gate-title {
+  margin: 0;
+  text-align: center;
+  font: 600 var(--fs-20)/1.4 var(--font-display);
+  letter-spacing: .02em;
+}
+
+.zs-gate-lead {
+  margin: 0;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.zs-gate-steps {
+  margin: var(--s-2) 0;
+  padding-left: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  color: var(--ink-2);
+}
+
+.zs-gate-input {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.zs-gate-input .pi-input {
+  flex: 1;
+  min-width: 0;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.zs-gate-tip {
+  min-height: 1.6em;
+  margin: 0;
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+}
+
+.zs-gate-tip--error {
+  color: var(--danger);
+}
+
+.zs-account-name {
+  color: var(--ok);
+}
+
+.zs-links {
+  display: flex;
+  gap: var(--s-3);
+  margin-top: var(--s-1);
+}
+
+.zs-update-ok {
+  color: var(--ink-3);
+}
+
+.zs-update-new {
+  color: var(--warn);
+}
+
+.zs-update-notice {
+  position: fixed;
+  right: var(--s-5);
+  bottom: var(--s-5);
+  z-index: var(--z-toast);
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-radius: var(--radius-lg);
+  background: var(--layer);
+  box-shadow: var(--shadow-dialog);
+  color: var(--ink);
+}
+
+.zs-update-notice p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.zs-update-notice-actions {
+  display: flex;
+  gap: var(--s-2);
+}
